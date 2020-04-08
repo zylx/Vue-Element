@@ -10,8 +10,9 @@ module.exports = {
     entry: './src/main.js',
     // 打包后资源输出路径
     output: {
-        filename: './bundle.js',
-        path: resolve(__dirname, './build')
+        filename: './bundle.[hash:8].js',
+        path: resolve(__dirname, './build'),
+        // publicPath: '/'
     },
     // 依赖模块，通过设置对应loader去执行一些webpack理解不了的语法资源
     // 如jsx转化为js，less转化为css等，相当于翻译官
@@ -166,6 +167,9 @@ module.exports = {
             errors: true
         },
         historyApiFallback: true,
+        // historyApiFallback: {
+        //     index: resolve(__dirname, '/index.html')
+        // },
         compress: true,
         open: true,
         hot: true

@@ -12,7 +12,7 @@
         />
         <el-container>
           <el-main>
-              <Main />
+            <Main />
           </el-main>
           <el-footer>
             <Footer />
@@ -58,7 +58,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="less" scoped>
 .el-header,
 .el-footer {
   padding: 0;
@@ -70,5 +70,9 @@ export default {
   bottom: 0;
   left: 0;
   right: 0;
+
+  .el-main {
+    //   padding: 10px 20px;
+  }
 }
 </style>

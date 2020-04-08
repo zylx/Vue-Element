@@ -6,7 +6,7 @@ export default () => {
     return new Router({
         routes,
         mode: 'history',
-        // base: '/admin/',
+        // base: __dirname,
         linkActiveClass: 'active-link',
         linkExactActiveClass: 'exact-active-link',
         scrollBehavior(to, from, savedPosition) {
