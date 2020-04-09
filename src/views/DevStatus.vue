@@ -4,14 +4,33 @@
         <div slot="header" class="clearfix">
           <span>设备状态</span>
         </div>
+        <div>
+          <my-chart chartId="myChart1" :chartOptions="chartOptions" width="500px" height="500px"></my-chart>
+          <my-chart chartId="myChart2" :chartOptions="chartOptions" width="500px" height="500px"></my-chart>
+          <my-chart chartId="myChart3" :chartOptions="chartOptions" width="500px" height="500px"></my-chart>
+          <my-chart chartId="myChart4" :chartOptions="chartOptions" width="500px" height="500px"></my-chart>
+          <vchart></vchart>
+          <vchart></vchart>
+          <vchart></vchart>
+          <vchart></vchart>
+        </div>
     </el-card>
   </div>
 </template>
 
 <script>
+
+import MyChart from '../components/echarts/MyChart.vue'
+import Vchart from '../components/echarts/Vchart.vue'
+
 export default {
   name: "DevStatus",
   props: ["a","b"],
+  data() {
+    return {
+      chartOptions: {}
+    }
+  },
   mounted() {
     console.log(this.a, this.b);
   },
@@ -22,6 +41,10 @@ export default {
       console.log(vm.a, vm.b)
       console.log(vm.$route)
     });
+  },
+  components: {
+    MyChart,
+    Vchart
   }
 };
 </script>

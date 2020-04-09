@@ -5,7 +5,7 @@
         <div slot="header" class="clearfix">
           <span>设备管理</span>
         </div>
-        <template>
+        <div>
           <el-table
             :data="tableData"
             style="width: 100%"
@@ -59,7 +59,7 @@
             <el-table-column prop="warnDistance" label="提醒液位"></el-table-column>
             <el-table-column prop="stopDistance" label="停机液位"></el-table-column>
           </el-table>
-        </template>
+        </div>
       </el-card>
     </el-row>
   </div>
