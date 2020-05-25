@@ -5,14 +5,13 @@
 </template>
 
 <script>
-
-// 引入基本模板，按需加载
-let Echarts = require('echarts/lib/echarts')
-//引入柱状图
-require('echarts/lib/chart/line')
-require('echarts/lib/component/title')
-require('echarts/lib/component/legend')
-require('echarts/lib/component/tooltip')
+// 引入基本模板
+let Echarts = require("echarts/lib/echarts");
+//按需引入需要的组件模块
+require("echarts/lib/chart/bar");
+require("echarts/lib/component/title");
+require("echarts/lib/component/legend");
+require("echarts/lib/component/tooltip");
 
 export default {
   name: "MyChart",
@@ -22,48 +21,52 @@ export default {
       required: true
     },
     width: {
-        type: String,
-        default: '500px'
+      type: String,
+      default: "500px"
     },
     height: {
-        type: String,
-        default: '500px'
+      type: String,
+      default: "500px"
     },
     chartOptions: {
       type: Object,
       required: true
-    }
+    },
   },
   mounted() {
-      this.drawChart()
+    this.createChart()
   },
   methods: {
-    drawChart() {
+    createChart() {
       // 基于准备好的dom，初始化echarts实例
       let chart = Echarts.init(document.getElementById(this.chartId));
       // 指定图表的配置项和数据
-      let option = {
+      var option = {
         title: {
-          text: "ECharts 入门示例1"
+          text: "一周价格走势"
         },
         tooltip: {},
         legend: {
-          data: ["销量"]
+          data: ["价格"]
         },
         xAxis: {
-          data: ["衬衫", "羊毛衫", "雪纺衫", "裤子", "高跟鞋", "袜子"]
+          type: "category",
+          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
         },
-        yAxis: {},
+        yAxis: {
+          type: "value"
+        },
         series: [
           {
-            name: "销量",
-            type: "line",
-            data: [5, 20, 36, 10, 10, 20]
+            name: "价格",
+            data: [220, 202, 231, 243, 225, 220, 213],
+            type: "bar",
+            smooth: true
           }
         ]
-      };
+      }
       chart.setOption(option);
     }
   }
-};
+}
 </script>

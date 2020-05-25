@@ -29,7 +29,7 @@
                       </el-option>
                     </el-select>
                   </el-form-item>
-                  <el-form-item label="液面距离（实时检测值）">
+                  <el-form-item label="实时液位">
                     <el-input-number v-model="props.row.liquidValue" controls-position="right" :min="0" :precision="2" :step="0.1"></el-input-number>
                   </el-form-item>
                   <el-form-item label="液面距离">
@@ -53,7 +53,7 @@
             <el-table-column prop="devId" label="ID" width="100"></el-table-column>
             <el-table-column prop="location" label="工作地点" width="180"></el-table-column>
             <el-table-column prop="workWay" :formatter="workWayFormat" label="工作方式" width="150"></el-table-column>
-            <el-table-column prop="liquidValue" label="液面距离（实时检测值）" width="200"></el-table-column>
+            <el-table-column prop="liquidValue" label="实时液位" width="200"></el-table-column>
             <el-table-column prop="jizhunDistance" label="液面距离"></el-table-column>
             <el-table-column prop="liquidDistance" label="对应液位"></el-table-column>
             <el-table-column prop="warnDistance" label="提醒液位"></el-table-column>

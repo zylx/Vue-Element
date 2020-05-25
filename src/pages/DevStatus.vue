@@ -5,13 +5,7 @@
           <span>设备状态</span>
         </div>
         <div>
-          <my-chart chartId="myChart1" :chartOptions="chartOptions" width="500px" height="500px"></my-chart>
-          <my-chart chartId="myChart2" :chartOptions="chartOptions" width="500px" height="500px"></my-chart>
-          <my-chart chartId="myChart3" :chartOptions="chartOptions" width="500px" height="500px"></my-chart>
-          <my-chart chartId="myChart4" :chartOptions="chartOptions" width="500px" height="500px"></my-chart>
-          <vchart></vchart>
-          <vchart></vchart>
-          <vchart></vchart>
+          <my-chart chartId="chart" :chartOptions="{}" width="500px" height="500px"></my-chart>
           <vchart></vchart>
         </div>
     </el-card>
