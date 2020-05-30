@@ -3,8 +3,8 @@ import VueRouter from 'vue-router'
 import ElementUI from 'element-ui'
 import './css/reset.css';
 import 'element-ui/lib/theme-chalk/index.css'
-import App from './App.vue';
 import createRouter from './config/router'
+import App from './App.vue';
 
 // 全局引入
 // import echarts from 'echarts'

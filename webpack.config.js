@@ -10,9 +10,9 @@ module.exports = {
     entry: './src/main.js',
     // 打包后资源输出路径
     output: {
-        filename: './bundle.[hash:8].js',
-        path: resolve(__dirname, './build'),
-        // publicPath: '/'
+        filename: 'bundle.[hash:8].js',
+        path: resolve(__dirname, 'build'),
+        publicPath: '/admin/'
     },
     // 依赖模块，通过设置对应loader去执行一些webpack理解不了的语法资源
     // 如jsx转化为js，less转化为css等，相当于翻译官
@@ -162,14 +162,14 @@ module.exports = {
     ],
     devServer: {
         port: 8000,
-        contentBase: resolve(__dirname, './build'),
+        contentBase: resolve(__dirname, 'build'),
         overlay: {
             errors: true
         },
-        historyApiFallback: true,
-        // historyApiFallback: {
-        //     index: resolve(__dirname, '/index.html')
-        // },
+        // historyApiFallback: true,
+        historyApiFallback: {
+            index: resolve(__dirname, '/index.html')
+        },
         compress: true,
         open: true,
         hot: true

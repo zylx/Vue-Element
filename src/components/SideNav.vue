@@ -13,22 +13,16 @@
       router
     >
       <el-menu-item class="handle-collapse" @click="$emit('handle-collapse')">
-        <i
-          :class="isCollapse ? 'el-icon-d-arrow-right' : 'el-icon-d-arrow-left'"
-        ></i>
+        <i :class="isCollapse ? 'el-icon-d-arrow-right' : 'el-icon-d-arrow-left'"></i>
         <span slot="title">{{ isCollapse ? "展开" : "收起" }}</span>
       </el-menu-item>
-      <el-menu-item index="/devmgt">
+      <el-menu-item index="/admin/devMgt">
         <i class="el-icon-menu"></i>
         <span slot="title">设备管理</span>
       </el-menu-item>
-      <el-menu-item index="/devstatus">
+      <el-menu-item index="/admin/devStatus">
         <i class="el-icon-document"></i>
         <span slot="title">设备状态</span>
-      </el-menu-item>
-      <el-menu-item index="/devmgt/test">
-        <i class="el-icon-setting"></i>
-        <span slot="title">导航四</span>
       </el-menu-item>
       <el-submenu index="4">
         <template slot="title">
@@ -54,7 +48,7 @@
 
 <script>
 export default {
-  name: "NavAside",
+  name: "SideBar",
   props: ["activeIndex", "isCollapse"],
   computed: {},
   methods: {
