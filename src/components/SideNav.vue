@@ -16,13 +16,21 @@
         <i :class="isCollapse ? 'el-icon-d-arrow-right' : 'el-icon-d-arrow-left'"></i>
         <span slot="title">{{ isCollapse ? "展开" : "收起" }}</span>
       </el-menu-item>
-      <el-menu-item index="/admin/devMgt">
-        <i class="el-icon-menu"></i>
-        <span slot="title">设备管理</span>
+      <el-menu-item index="/dev/settings">
+        <i class="el-icon-setting"></i>
+        <span slot="title">设备设置</span>
       </el-menu-item>
-      <el-menu-item index="/admin/devStatus">
-        <i class="el-icon-document"></i>
+      <el-menu-item index="/dev/status">
+        <i class="el-icon-data-line"></i>
         <span slot="title">设备状态</span>
+      </el-menu-item>
+      <el-menu-item index="/dev/alarmConfig">
+        <i class="el-icon-bell"></i>
+        <span slot="title">告警配置</span>
+      </el-menu-item>
+      <el-menu-item index="/dev/historyEvents">
+        <i class="el-icon-warning-outline"></i>
+        <span slot="title">历史记录</span>
       </el-menu-item>
       <el-submenu index="4">
         <template slot="title">
@@ -68,7 +76,7 @@ export default {
 
 <style lang="less" scoped>
 .el-menu-vertical:not(.el-menu--collapse) {
-  width: 200px;
+  width: 150px;
   /* min-height: 400px; */
   height: 100%;
 }
@@ -78,5 +86,10 @@ export default {
   .handle-collapse i {
     color: #f0f0f0;
   }
+}
+
+.el-menu-item i,
+.el-submenu__title i {
+    color: #CCC;
 }
 </style>

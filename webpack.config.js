@@ -12,7 +12,7 @@ module.exports = {
     output: {
         filename: 'bundle.[hash:8].js',
         path: resolve(__dirname, 'build'),
-        publicPath: '/admin/'
+        publicPath: '/dev/'
     },
     // 依赖模块，通过设置对应loader去执行一些webpack理解不了的语法资源
     // 如jsx转化为js，less转化为css等，相当于翻译官
