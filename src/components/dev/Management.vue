@@ -22,11 +22,11 @@
             @click="$emit('devConfEdit', {index: scope.$index, row: scope.row})"
             style="margin-right: 5px;">编辑</el-button>
           <el-popconfirm
-            icon="el-icon-info"
-            iconColor="#e6a23c"
             title="确定要删除该配置吗？"
             confirmButtonText='确定'
             cancelButtonText='取消'
+            icon="el-icon-info"
+            iconColor="#e6a23c"
             @onConfirm="$emit('devConfDelete', {index: scope.$index, row: scope.row})"
           >
             <el-button

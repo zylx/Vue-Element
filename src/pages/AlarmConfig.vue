@@ -3,7 +3,14 @@
     <el-card class="box-card">
       <div slot="header" class="clearfix">
         <span>手机配置</span>
-        <el-button @click="addPhone" type="success" size="small" style="float: right;">添加手机号</el-button>
+        <el-popover
+        placement="left"
+        title="提示"
+        trigger="manual"
+        content="最多可添加10个手机号码！"
+        v-model="popoverShow">
+        <el-button slot="reference" @click="addPhone" type="success" size="small" style="float: right;">添加手机号</el-button>
+      </el-popover>
       </div>
       <el-form :model="confForm" ref="confForm" inline label-width="100px">
         <div>
@@ -43,6 +50,7 @@
   export default {
     data() {
       return {
+        popoverShow: false,
         confForm: {
           phones: [{
             value: ''
@@ -54,7 +62,8 @@
       onSubmit(formName) {
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            alert('submit!');
+            console.log(this.confForm.phones);
+            console.log(this.$refs[formName]);
           } else {
             console.log('error submit!!');
             return false;
@@ -71,20 +80,23 @@
         }
       },
       addPhone() {
-        this.confForm.phones.push({
-          value: '',
-          key: Date.now()
-        });
+        if(this.confForm.phones.length < 10){
+          this.confForm.phones.push({
+            value: '',
+            key: Date.now()
+          });
+          this.popoverShow = false;
+        } else {
+          this.popoverShow = !this.popoverShow;
+        }
       },
       validatePhone(rule, value, callback) {
-        console.log("validatePhone -> value", value)
         if (value === '') {
-          callback(new Error('手机号不能为空'));
+          callback(new Error('手机号不能为空！'));
         } else {
-          // if (this.phones.checkPass !== '') {
-          //   this.$refs.ruleForm.validateField('checkPass');
-          // }
-          callback();
+          if (!(/^[1][3,4,5,7,8,9][0-9]{9}$/.test(value))) {
+            callback(new Error('手机号格式不正确！'));
+          }
         }
       }
     }
