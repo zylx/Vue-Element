@@ -1,7 +1,11 @@
-const { resolve } = require('path');
+const {
+    resolve
+} = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const {
+    CleanWebpackPlugin
+} = require('clean-webpack-plugin');
 
 module.exports = {
     // 开发模式，webpack会根据该模式使用相应的编译配置
@@ -170,8 +174,26 @@ module.exports = {
         historyApiFallback: {
             index: resolve(__dirname, '/index.html')
         },
-        compress: true,
-        open: true,
-        hot: true
+        hot: true, //开启热点
+        open: false, //自动打开浏览器
+        progress: true, //显示打包的进度
+        quiet: false, //控制台中不输出打包的信息
+        noInfo: false,
+        inline: true, //开启页面自动刷新
+        lazy: false, //不启动懒加载
+        watchOptions: {
+            aggregateTimeout: 300
+        },
+        //配置解决跨域问题
+        proxy: {
+            '/api': {
+                target: 'http://127.0.0.1:80/youbeng',
+                pathRewrite: {
+                    '^/api': '' //路径重写
+                },
+                changeOrigin: true, // target是域名的话，需要这个参数，
+                secure: false, //不检查安全问题
+            }
+        }
     }
 }

@@ -26,9 +26,9 @@ export default {
     },
     height: {
       type: String,
-      default: "500px"
+      default: "300px"
     },
-    chartOptions: {
+    options: {
       type: Object,
       required: true
     },
@@ -40,32 +40,9 @@ export default {
     createChart() {
       // 基于准备好的dom，初始化echarts实例
       let chart = Echarts.init(document.getElementById(this.chartId));
+      
       // 指定图表的配置项和数据
-      var option = {
-        title: {
-          text: "一周价格走势"
-        },
-        tooltip: {},
-        legend: {
-          data: ["价格"]
-        },
-        xAxis: {
-          type: "category",
-          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-        },
-        yAxis: {
-          type: "value"
-        },
-        series: [
-          {
-            name: "价格",
-            data: [220, 202, 231, 243, 225, 220, 213],
-            type: "bar",
-            smooth: true
-          }
-        ]
-      }
-      chart.setOption(option);
+      chart.setOption(this.options);
     }
   }
 }

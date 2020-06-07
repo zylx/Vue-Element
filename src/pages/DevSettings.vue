@@ -116,7 +116,7 @@ export default {
       },
       confData: [
         {
-          devId: '#1',
+          devId: '1',
           channel: 3,
           location: '广州',
           devDesc: '',
@@ -128,7 +128,7 @@ export default {
           stopDistance: 300
         },
         {
-          devId: '#2',
+          devId: '2',
           channel: 1,
           location: '深圳',
           devDesc: '',

@@ -35,11 +35,17 @@
         :data="tableData"
         style="width: 100%"
         row-key="devId"
-        :expand-row-keys="['#1']"
+        :expand-row-keys="['1']"
       >
         <el-table-column type="expand">
           <template slot-scope="props">
-            <chart ref="chart" :options="chartOptions" :auto-resize="true"></chart>
+            <my-chart 
+              ref="myChart"
+              width="100%"
+              :chartId="props.row.devId"
+              :options="chartOptions"
+              :auto-resize="true"
+            />
           </template>
         </el-table-column>
         <el-table-column prop="devId" label="设备ID" width="100"></el-table-column>
@@ -57,8 +63,11 @@
 </template>
 
 <script>
+
+import MyChart from '../components/echarts/MyChart.vue';
+
 export default {
-  name: "DevMgt",
+  name: "HIstoryEvents",
   data() {
     return {
       searchForm: {
@@ -78,7 +87,7 @@ export default {
       },
       tableData: [
         {
-          devId: '#1',
+          devId: '1',
           channel: 1,
           location: '广州',
           workWay: 1,
@@ -91,7 +100,7 @@ export default {
           updateTime: ''
         },
         {
-          devId: '#2',
+          devId: '2',
           channel: 1,
           location: '深圳',
           workWay: 0,
@@ -119,8 +128,30 @@ export default {
           data: ["液位值"]
         },
         xAxis: {
-          type: "category",
-          data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+          type: 'category',
+          data: [
+            '2020-05-29 12:30:56',
+            '2020-05-29 13:31:02',
+            '2020-05-29 14:30:23',
+            '2020-05-29 15:29:45',
+            '2020-05-29 16:31:56',
+            '2020-05-29 17:32:54',
+            '2020-05-29 18:30:34',
+            '2020-05-29 19:29:26',
+            '2020-05-29 30:30:42'
+          ],
+          axisLine: {
+              lineStyle: {
+                  color: '#666'
+              }
+          },
+          axisLabel: {
+              interval: 0, //设置坐标X轴分割间隔
+              rotate: 22,
+              textStyle: {
+                  fontFamily: 'Microsoft YaHei'
+              }
+          },
         },
         yAxis: {
           type: "value"
@@ -128,7 +159,7 @@ export default {
         series: [
           {
             name: "液位值",
-            data: [220, 202, 231, 243, 225, 220, 213],
+            data: [30.8, 52.3, 81.1, 102.6, 121.1, 142.0, 163.9, 180.2, 200.3, 220.8],
             type: "line",
             smooth: true
           }
@@ -150,6 +181,9 @@ export default {
         }
       }
     }
+  },
+  components: {
+    MyChart
   }
 };
 </script>
