@@ -63,7 +63,7 @@ export default {
       return row.devDesc !== '' ? row.devDesc : '暂无'
     },
     workWayFormat(row, column) {
-      return row.workWay === '0' ? '充油' : '排油'
+      return row.workWay == 0 ? '充油' : '排油'
     }
   }
 }

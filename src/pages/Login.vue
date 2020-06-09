@@ -83,9 +83,9 @@ export default {
                         .get("api/login.php", {
                             params: {
                                 username: self.userForm.user,
-                                password: self.passEncryption(
-                                    self.userForm.pass
-                                ),
+                                password: self
+                                    .$md5(self.userForm.pass)
+                                    .substr(5, 10),
                             },
                         })
                         .then(function(response) {
@@ -99,9 +99,17 @@ export default {
                                     duration: 2000,
                                     offset: 70,
                                     onClose: () => {
-                                        sessionStorage.setItem('user', self.userForm.user)
-                                        sessionStorage.setItem('tk', data.token)
-                                        self.$router.push({path: '/dev/status'})
+                                        sessionStorage.setItem(
+                                            "user",
+                                            self.userForm.user
+                                        );
+                                        sessionStorage.setItem(
+                                            "tk",
+                                            data.token
+                                        );
+                                        self.$router.push({
+                                            path: "/dev/status",
+                                        });
                                     },
                                 });
                             } else {
@@ -120,16 +128,13 @@ export default {
                             }
                         })
                         .catch(function(error) {
-                            console.log(error)
-                        })
+                            console.log(error);
+                        });
                 } else {
-                    console.log("error submit!!")
-                    return false
+                    console.log("error submit!!");
+                    return false;
                 }
             });
-        },
-        passEncryption(pass) {
-            return this.$md5(pass).substr(5, 10);
         },
     },
 };

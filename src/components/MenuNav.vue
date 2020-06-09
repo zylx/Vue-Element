@@ -70,6 +70,7 @@ export default {
                 type: "warning",
             })
                 .then(() => {
+                    sessionStorage.removeItem('user');
                     this.$router.push({ path: "/login" });
                 })
                 .catch(() => {});
