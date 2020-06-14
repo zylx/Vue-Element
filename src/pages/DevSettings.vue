@@ -23,16 +23,17 @@
                         v-model="confForm.devDesc"
                     ></el-input>
                 </el-form-item>
-                <el-form-item label="采集设备" prop="devicePhyID">
+                <el-form-item label="采集设备" prop="devPhyId">
                     <el-select
-                        v-model="confForm.devicePhyID"
+                        v-model="confForm.devPhyId"
                         placeholder="请选择采集设备"
+                        :disabled="isEdit"
                     >
                         <el-option
                             v-for="(val, key) in devicePhy"
                             :key="key"
                             :label="val.name"
-                            :value="val.devID"
+                            :value="val.devPhyId"
                         >
                         </el-option>
                     </el-select>
@@ -41,6 +42,7 @@
                     <el-select
                         v-model="confForm.channel"
                         placeholder="请选择设备通道"
+                        :disabled="isEdit"
                     >
                         <el-option
                             v-for="(val, key) in channels"
@@ -65,9 +67,18 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="实时液位" prop="liquidValue">
+                <!-- <el-form-item label="实时液位" prop="liquidValue">
                     <el-input-number
                         v-model="confForm.liquidValue"
+                        controls-position="right"
+                        :min="0"
+                        :precision="2"
+                        :step="0.1"
+                    ></el-input-number>
+                </el-form-item> -->
+                <el-form-item label="基准液位" prop="liquidDistance">
+                    <el-input-number
+                        v-model="confForm.liquidDistance"
                         controls-position="right"
                         :min="0"
                         :precision="2"
@@ -77,15 +88,6 @@
                 <el-form-item label="液面距离" prop="jizhunDistance">
                     <el-input-number
                         v-model="confForm.jizhunDistance"
-                        controls-position="right"
-                        :min="0"
-                        :precision="2"
-                        :step="0.1"
-                    ></el-input-number>
-                </el-form-item>
-                <el-form-item label="对应液位" prop="liquidDistance">
-                    <el-input-number
-                        v-model="confForm.liquidDistance"
                         controls-position="right"
                         :min="0"
                         :precision="2"
@@ -140,18 +142,19 @@ export default {
     name: "DevSettings",
     data() {
         return {
+            isEdit: false,
             submitType: 0,
             devicePhy: [],
             channels: [1, 2, 3, 4],
             workWays: ["充油", "排油"],
             confForm: {
                 devId: "",
+                devPhyId: "",
                 location: "",
                 devDesc: "",
-                devicePhyID: "",
                 channel: "",
                 workWay: "",
-                liquidValue: "",
+                // liquidValue: "",
                 jizhunDistance: "",
                 liquidDistance: "",
                 warnDistance: "",
@@ -163,6 +166,13 @@ export default {
                         required: true,
                         message: "请输入工作地点",
                         trigger: "blur",
+                    },
+                ],
+                devPhyId: [
+                    {
+                        required: true,
+                        message: "请选择采集器",
+                        trigger: "change",
                     },
                 ],
                 channel: [
@@ -179,13 +189,13 @@ export default {
                         trigger: "change",
                     },
                 ],
-                liquidValue: [
-                    {
-                        required: true,
-                        message: "请输入实时液位",
-                        trigger: "blur",
-                    },
-                ],
+                // liquidValue: [
+                //     {
+                //         required: true,
+                //         message: "请输入实时液位",
+                //         trigger: "blur",
+                //     },
+                // ],
                 jizhunDistance: [
                     {
                         required: true,
@@ -196,7 +206,7 @@ export default {
                 liquidDistance: [
                     {
                         required: true,
-                        message: "请输入对应液位",
+                        message: "请输入基准液位",
                         trigger: "blur",
                     },
                 ],
@@ -249,7 +259,7 @@ export default {
                             if (/^user_\d+/.test(i)) {
                                 let item = data[i];
                                 self.devicePhy.push({
-                                    devID: item.device_phy_id,
+                                    devPhyId: item.device_phy_id,
                                     name: item.name,
                                 });
                             }
@@ -279,12 +289,13 @@ export default {
                                 let item = data[i];
                                 self.confData.push({
                                     devId: item.device_id,
-                                    userId: item.user_id,
+                                    devPhyId: item.user_id,
+                                    devicePhy: self.devicePhy,
                                     channel: item.channel,
                                     location: item.location,
                                     devDesc: item.dev_desc,
                                     workWay: item.work_type,
-                                    liquidValue: 10,
+                                    // liquidValue: 10,
                                     jizhunDistance: item.jizhun_distance,
                                     liquidDistance: item.liquid_distance,
                                     warnDistance: item.warn_distance,
@@ -307,7 +318,7 @@ export default {
                     let formData = self.confForm;
                     self.axios
                         .post(
-                            `../api/config.php?eventtype=1&channel=${formData.channel}&token=${self.token}&user_id=${formData.devicePhyID}`,
+                            `../api/config.php?eventtype=1&channel=${formData.channel}&token=${self.token}&user_id=${formData.devPhyId}`,
                             {
                                 location: formData.location,
                                 dev_desc: formData.devDesc,
@@ -332,6 +343,8 @@ export default {
                                     type: "success",
                                     offset: 70,
                                 });
+                                self.confData = [];
+                                self.getCongData();
                             }
                         })
                         .catch(function(error) {
@@ -346,21 +359,22 @@ export default {
         resetForm(formName) {
             this.$refs[formName].resetFields();
             this.submitType = 0;
+            this.isEdit = false;
         },
         devConfEdit(param) {
-            // console.log(param)
-            this.confForm = param.row;
+            let row = JSON.stringify(param.row);
+            this.confForm = JSON.parse(row);
             this.submitType = 1;
+            this.isEdit = true;
         },
         devConfDelete(param) {
             // console.log(param.row);
             let self = this;
-            let userId = param.row.userId;
+            let devPhyId = param.row.devPhyId;
             let channel = param.row.channel;
             self.axios
-                .post(`../api/config.php?eventtype=2&channel=${channel}&token=${self.token}&user_id=${userId}`)
+                .post(`../api/config.php?eventtype=2&channel=${channel}&token=${self.token}&user_id=${devPhyId}`)
                 .then(function(response) {
-                    console.log("onSubmit -> response", response);
                     let { status, data } = response;
                     let errCode = data.error_code;
                     if (status === 200 && errCode === 4000) {
@@ -369,6 +383,8 @@ export default {
                             type: "success",
                             offset: 70,
                         });
+                        self.confData = [];
+                        self.getCongData();
                     }
                 })
                 .catch(function(error) {
