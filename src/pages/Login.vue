@@ -22,6 +22,7 @@
                                 <el-input
                                     type="text"
                                     v-model.trim="userForm.user"
+                                    @keyup.enter.native="onSubmit('userForm')"
                                     autocomplete="off"
                                 ></el-input>
                             </el-form-item>
@@ -29,6 +30,7 @@
                                 <el-input
                                     type="password"
                                     v-model.trim="userForm.pass"
+                                    @keyup.enter.native="onSubmit('userForm')"
                                     autocomplete="off"
                                 ></el-input>
                             </el-form-item>

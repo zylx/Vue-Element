@@ -11,7 +11,7 @@ module.exports = {
     // 开发模式，webpack会根据该模式使用相应的编译配置
     mode: 'development',
     // 打包入口
-    entry: './src/main.js',
+    entry: ['./src/main.js', './src/index.html'],
     // 打包后资源输出路径
     output: {
         filename: 'bundle.[hash:8].js',
@@ -195,5 +195,6 @@ module.exports = {
                 secure: false, //不检查安全问题
             }
         }
-    }
+    },
+    devtool: 'source-map'
 }

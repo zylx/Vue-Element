@@ -31,6 +31,7 @@
                         <el-select
                             v-model="confForm.devicePhyID"
                             placeholder="请选择采集设备"
+                            :disabled="isEdit"
                         >
                             <el-option
                                 v-for="(val, key) in devicePhy"
@@ -81,20 +82,37 @@
                     </el-input>
                 </el-form-item>
                 <el-form-item style="display: block;text-align: center;">
-                    <el-button type="primary" @click="onSubmit('confForm')">提交</el-button>
+                    <el-button type="primary" @click="onSubmit('confForm')"
+                        >提交</el-button
+                    >
                     <el-button @click="resetForm('confForm')">重置</el-button>
                 </el-form-item>
             </el-form>
+        </el-card>
+
+        <el-card class="box-card" style="margin-top: 20px;">
+            <div slot="header" class="clearfix">
+                <span>配置列表</span>
+            </div>
+            <phone-config-list
+                :configData="configData"
+                @confEdit="confEdit"
+                @confDelete="confDelete"
+            />
         </el-card>
     </div>
 </template>
 
 <script>
+import PhoneConfigList from "../components/dev/PhoneConfigList.vue";
+
 export default {
     data() {
         return {
+            isEdit: false,
             popoverShow: false,
             devicePhy: [],
+            configData: [],
             confForm: {
                 phones: [
                     {
@@ -114,7 +132,7 @@ export default {
     },
     created() {
         this.getCollector(); // 获取采集器
-        this.getConfForm();
+        this.getConfigData();
     },
     methods: {
         getCollector() {
@@ -138,7 +156,7 @@ export default {
                             if (/^user_\d+/.test(i)) {
                                 let item = data[i];
                                 self.devicePhy.push({
-                                    devID: item.device_phy_id,
+                                    devID: parseInt(item.device_phy_id),
                                     name: item.name,
                                 });
                             }
@@ -149,14 +167,32 @@ export default {
                     console.log(error);
                 });
         },
-        getConfForm() {
+        getConfigData(devicePhyID = '') {
             let self = this;
             self.axios
-                .post(
-                    `../api/send_conf.php?eventtype=2&token=${self.token}&user_id=1`
+                .get(
+                    `../api/send_conf.php?eventtype=2&token=${self.token}&user_id=2`
                 )
                 .then(function(response) {
-                    console.log("getConfForm -> response", response);
+                    console.log("getConfigData -> response", response);
+                    let { status, data } = response;
+                    let errCode = data.error_code;
+                    if (
+                        status === 200 &&
+                        errCode === 4000 &&
+                        Object.keys(data).length > 0
+                    ) {
+                        let configData = [{
+                            phones: data.phone.map((item) => {
+                                return item;
+                            }),
+                            devicePhyID: devicePhyID,
+                            sendTimes: data.send_times,
+                            sendInterval: data.send_interval,
+                        }];
+                        console.log("getConfigData -> configData", configData)
+                        devicePhyID && (self.confForm = configData) || (self.configData = configData)
+                    }
                 })
                 .catch(function(error) {
                     console.log(error);
@@ -164,18 +200,19 @@ export default {
         },
         onSubmit(formName) {
             let self = this;
-            this.$refs[formName].validate((valid) => {
+            self.$refs[formName].validate((valid) => {
                 if (valid) {
                     console.log("submit!");
                     let formData = self.confForm;
-                    console.log("onSubmit -> formData", formData)
                     self.axios
                         .post(
                             `../api/send_conf.php?eventtype=1&token=${self.token}&user_id=${formData.devicePhyID}`,
                             {
                                 send_times: formData.sendTimes,
                                 send_interval: formData.sendInterval,
-                                phones: [],
+                                phone: formData.phones.map(
+                                    (item) => item.value
+                                ),
                             }
                         )
                         .then(function(response) {
@@ -215,7 +252,6 @@ export default {
             if (this.confForm.phones.length < 10) {
                 this.confForm.phones.push({
                     value: "",
-                    key: Date.now(),
                 });
                 this.popoverShow = false;
             } else {
@@ -228,9 +264,21 @@ export default {
             } else {
                 if (!/^[1][3,4,5,7,8,9][0-9]{9}$/.test(value)) {
                     callback(new Error("手机号格式不正确！"));
+                } else {
+                    callback();
                 }
             }
         },
+        confEdit(index, row) {
+            console.log("confEdit -> index, row", index, row);
+            this.getConfigData(2);
+        },
+        confDelete(index, row) {
+            console.log("confDelete -> index, row", index, row);
+        },
+    },
+    components: {
+        PhoneConfigList,
     },
 };
 </script>

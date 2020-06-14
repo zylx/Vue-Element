@@ -16,15 +16,15 @@
               :picker-options="searchForm.pickerOptions">
             </el-date-picker>
           </el-form-item>
-          <el-form-item label="工作方式">
-            <el-select v-model="searchForm.workWay" placeholder="不限" style="width: 120px;">
-              <el-option label="不限" value=""></el-option>
-              <el-option label="充油" value="0"></el-option>
-              <el-option label="排油" value="1"></el-option>
-            </el-select>
-          </el-form-item>
+          
           <el-form-item>
-            <el-input v-model="searchForm.key" placeholder="请输入关键词搜索"></el-input>
+            <el-input v-model="searchForm.key" placeholder="请输入关键词搜索" style="width: 350px;">
+              <el-select v-model="searchForm.workWay" slot="prepend" placeholder="不限" style="width: 86px;">
+                <el-option label="不限" value=""></el-option>
+                <el-option label="充油" value="0"></el-option>
+                <el-option label="排油" value="1"></el-option>
+              </el-select>
+            </el-input>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" icon="el-icon-search">搜索</el-button>
