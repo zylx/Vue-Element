@@ -33,7 +33,7 @@
                             v-for="(val, key) in devicePhy"
                             :key="key"
                             :label="val.name"
-                            :value="val.devPhyId"
+                            :value="val.devId"
                         >
                         </el-option>
                     </el-select>
@@ -228,80 +228,63 @@ export default {
             confData: [],
         };
     },
-    computed: {
-        token() {
-            return sessionStorage.getItem("tk");
-        },
-    },
     created() {
         this.getCollector(); // 获取采集器
-        this.getCongData(); // 获取已经添加的设备配置信息
+        this.getConfData(); // 获取已经添加的设备配置信息
     },
     methods: {
         getCollector() {
             let self = this;
-            self.axios
-                .get("../api/collector.php", {
+            this.$services
+                .devCollector({
                     params: {
                         eventtype: 1,
-                        token: self.token,
                     },
                 })
-                .then(function(response) {
-                    let { status, data } = response;
-                    let errCode = data.error_code;
-                    if (
-                        status === 200 &&
-                        errCode === 4000 &&
-                        Object.keys(data).length > 0
-                    ) {
+                .then((res) => {
+                    let { error_code, data } = res;
+                    if (error_code === 4000 && Object.keys(data).length > 0) {
                         for (let i in data) {
-                            if (/^user_\d+/.test(i)) {
-                                let item = data[i];
-                                self.devicePhy.push({
-                                    devPhyId: item.device_phy_id,
-                                    name: item.name,
-                                });
-                            }
+                            let item = data[i];
+                            self.devicePhy.push({
+                                devId: item.device_phy_id,
+                                name: item.name,
+                            });
                         }
                     }
                 })
-                .catch(function(error) {
+                .catch((error) => {
                     console.log(error);
                 });
         },
-        getCongData() {
+        getConfData() {
             let self = this;
-            self.axios
-                .post(
-                    `../api/config.php?eventtype=3&channel=0&token=${self.token}`
-                )
-                .then(function(response) {
-                    let { status, data } = response;
-                    let errCode = data.error_code;
-                    if (
-                        status === 200 &&
-                        errCode === 4000 &&
-                        Object.keys(data).length > 0
-                    ) {
-                        for (let i in data) {
-                            if (/^dev_\d+/.test(i)) {
-                                let item = data[i];
-                                self.confData.push({
-                                    devId: item.device_id,
-                                    devPhyId: item.user_id,
-                                    devicePhy: self.devicePhy,
-                                    channel: item.channel,
-                                    location: item.location,
-                                    devDesc: item.dev_desc,
-                                    workWay: item.work_type,
-                                    // liquidValue: 10,
-                                    jizhunDistance: item.jizhun_distance,
-                                    liquidDistance: item.liquid_distance,
-                                    warnDistance: item.warn_distance,
-                                    stopDistance: item.stop_distance,
-                                });
-                            }
+            self.$services
+                .devConfig({
+                    params: {
+                        eventtype: 3,
+                        channel: 0,
+                    },
+                })
+                .then(function(res) {
+                    let { error_code, data } = res;
+                    if (error_code === 4000 && Object.keys(data).length > 0) {
+                        for (let key in data) {
+                            let item = data[key];
+                            self.confData.push({
+                                devId: item.device_id,
+                                devPhyId: item.user_id,
+                                devicePhy: self.devicePhy,
+                                channel: item.channel,
+                                location: item.location,
+                                devDesc: item.dev_desc,
+                                workWay: item.work_type,
+                                // liquidValue: 10,
+                                jizhunDistance: item.jizhun_distance,
+                                liquidDistance: item.liquid_distance,
+                                warnDistance: item.warn_distance,
+                                stopDistance: item.stop_distance,
+                            });
                         }
                     }
                 })
@@ -314,12 +297,20 @@ export default {
             self.$refs[formName].validate((valid) => {
                 if (valid) {
                     console.log("submit!");
-                    let self = this;
                     let formData = self.confForm;
-                    self.axios
-                        .post(
-                            `../api/config.php?eventtype=1&channel=${formData.channel}&token=${self.token}&user_id=${formData.devPhyId}`,
-                            {
+                    self.$services
+                        .devConfig({
+                            isHandleError: true,
+                            method: "post",
+                            headers: {
+                                "Content-Type": "application/json; charset=UTF-8",
+                            },
+                            params: {
+                                eventtype: 1,
+                                channel: formData.channel,
+                                user_id: formData.devPhyId,
+                            },
+                            data: {
                                 location: formData.location,
                                 dev_desc: formData.devDesc,
                                 work_type: formData.workWay,
@@ -328,24 +319,22 @@ export default {
                                 liquid_distance: formData.liquidDistance,
                                 warn_distance: formData.warnDistance,
                                 stop_distance: formData.stopDistance,
-                            }
-                        )
-                        .then(function(response) {
-                            // console.log("onSubmit -> response", response);
-                            let { status, data } = response;
-                            let errCode = data.error_code;
-                            if (status === 200) {
-                                self.$message({
-                                    message:
-                                        errCode === 4008
-                                            ? "添加成功！"
-                                            : "修改成功！",
-                                    type: "success",
-                                    offset: 70,
-                                });
-                                self.confData = [];
-                                self.getCongData();
-                            }
+                            },
+                        })
+                        .then(function(res) {
+                            let errorCode = res.error_code;
+                            const errorCodeObj = {
+                                4008: "添加成功！",
+                                4009: "修改成功！",
+                            };
+                            const inErrorCodeObj = errorCodeObj[errorCode] ? true : false;
+                            self.$message({
+                                message: inErrorCodeObj ? errorCodeObj[errorCode] : res.error_msg,
+                                type: inErrorCodeObj ? "success" : "error",
+                                offset: 70,
+                            });
+                            self.confData = [];
+                            self.getConfData();
                         })
                         .catch(function(error) {
                             console.log(error);
@@ -356,43 +345,44 @@ export default {
                 }
             });
         },
-        resetForm(formName) {
-            this.$refs[formName].resetFields();
-            this.submitType = 0;
-            this.isEdit = false;
-        },
-        devConfEdit(param) {
-            let row = JSON.stringify(param.row);
-            this.confForm = JSON.parse(row);
-            this.submitType = 1;
-            this.isEdit = true;
-        },
         devConfDelete(param) {
-            // console.log(param.row);
             let self = this;
             let devPhyId = param.row.devPhyId;
             let channel = param.row.channel;
-            self.axios
-                .post(`../api/config.php?eventtype=2&channel=${channel}&token=${self.token}&user_id=${devPhyId}`)
-                .then(function(response) {
-                    let { status, data } = response;
-                    let errCode = data.error_code;
-                    if (status === 200 && errCode === 4000) {
+            self.$services
+                .devConfig({
+                    params: {
+                        eventtype: 2,
+                        channel: 1,
+                        user_id: devPhyId,
+                    },
+                })
+                .then(function(res) {
+                    if (res.error_code === 4000) {
                         self.$message({
                             message: "设备已经删除！",
                             type: "success",
                             offset: 70,
                         });
                         self.confData = [];
-                        self.getCongData();
+                        self.getConfData();
                     }
                 })
                 .catch(function(error) {
                     console.log(error);
                 });
         },
-        hasOwnProp(obj, key) {
-            return Object.prototype.hasOwnProperty.call(obj, key);
+        resetForm(formName) {
+            this.$refs[formName].resetFields();
+            this.submitType = 0;
+            this.isEdit = false;
+        },
+        devConfEdit(param) {
+            //深拷贝，实现点击编辑后，再点击重置不会因为存在引用问题而相互影响
+            const newRow = JSON.stringify(param.row);
+            this.confForm = JSON.parse(newRow);
+            this.submitType = 1;
+            this.isEdit = true;
         },
     },
     components: {

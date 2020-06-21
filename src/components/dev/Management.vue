@@ -61,8 +61,8 @@ export default {
       return '';
     },
     devPhyFormat(row, column) {
-      let devicePhyLen = row.devicePhy.length
-      return devicePhyLen > 0 ? row.devicePhy.filter( item => item.devPhyId === row.devPhyId)[0].name : devPhyId
+      let devicePhyLen = row.devicePhy.length;
+      return devicePhyLen > 0 ? row.devicePhy.filter( item => item.devId === row.devPhyId)[0].name : row.devPhyId
     },
     devDescFormat(row, column) {
       return row.devDesc !== '' ? row.devDesc : '暂无'

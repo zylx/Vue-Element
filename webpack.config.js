@@ -191,7 +191,7 @@ module.exports = {
                 pathRewrite: {
                     '^/api': '' //路径重写
                 },
-                changeOrigin: true, // target是域名的话，需要这个参数，
+                changeOrigin: true, //设置为true，那么本地会虚拟一个服务端接收你的请求并代你发送该请求，这样就不会有跨域问题了，当然这只适用于开发环境
                 secure: false, //不检查安全问题
             }
         }

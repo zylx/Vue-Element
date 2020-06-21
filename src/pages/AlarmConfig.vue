@@ -27,7 +27,12 @@
                 label-width="100px"
             >
                 <div>
-                    <el-form-item label="采集设备" prop="devicePhyID">
+                    <el-form-item
+                        label="采集设备"
+                        prop="devicePhyID"
+                        :required="true"
+                        :show-message="false"
+                    >
                         <el-select
                             v-model="confForm.devicePhyID"
                             placeholder="请选择采集设备"
@@ -37,7 +42,7 @@
                                 v-for="(val, key) in devicePhy"
                                 :key="key"
                                 :label="val.name"
-                                :value="val.devID"
+                                :value="val.devId"
                             >
                             </el-option>
                         </el-select>
@@ -64,7 +69,7 @@
                 <el-form-item
                     v-for="(phone, index) in confForm.phones"
                     :label="'手机号' + parseInt(index + 1)"
-                    :key="phone.key"
+                    :key="index"
                     :prop="'phones.' + index + '.value'"
                     :rules="{
                         required: true,
@@ -82,8 +87,10 @@
                     </el-input>
                 </el-form-item>
                 <el-form-item style="display: block;text-align: center;">
-                    <el-button type="primary" @click="onSubmit('confForm')"
-                        >提交</el-button
+                    <el-button
+                        :type="submitType ? 'primary' : 'success'"
+                        @click="onSubmit('confForm')"
+                        >{{ submitType ? "保 存" : "添 加" }}</el-button
                     >
                     <el-button @click="resetForm('confForm')">重置</el-button>
                 </el-form-item>
@@ -111,6 +118,7 @@ export default {
         return {
             isEdit: false,
             popoverShow: false,
+            submitType: 0,
             devicePhy: [],
             configData: [],
             confForm: {
@@ -125,11 +133,6 @@ export default {
             },
         };
     },
-    computed: {
-        token() {
-            return sessionStorage.getItem("tk");
-        },
-    },
     created() {
         this.getCollector(); // 获取采集器
         this.getConfigData();
@@ -137,61 +140,54 @@ export default {
     methods: {
         getCollector() {
             let self = this;
-            self.axios
-                .get("../api/collector.php", {
+            this.$services
+                .devCollector({
                     params: {
                         eventtype: 1,
-                        token: self.token,
                     },
                 })
-                .then(function(response) {
-                    let { status, data } = response;
-                    let errCode = data.error_code;
-                    if (
-                        status === 200 &&
-                        errCode === 4000 &&
-                        Object.keys(data).length > 0
-                    ) {
+                .then((res) => {
+                    let { error_code, data } = res;
+                    if (error_code === 4000 && Object.keys(data).length > 0) {
                         for (let i in data) {
-                            if (/^user_\d+/.test(i)) {
-                                let item = data[i];
-                                self.devicePhy.push({
-                                    devID: parseInt(item.device_phy_id),
-                                    name: item.name,
-                                });
-                            }
+                            let item = data[i];
+                            self.devicePhy.push({
+                                devId: parseInt(item.device_phy_id),
+                                name: item.name,
+                            });
                         }
                     }
                 })
-                .catch(function(error) {
+                .catch((error) => {
                     console.log(error);
                 });
         },
-        getConfigData(devicePhyID = '') {
+        getConfigData() {
             let self = this;
-            self.axios
-                .get(
-                    `../api/send_conf.php?eventtype=2&token=${self.token}&user_id=2`
-                )
-                .then(function(response) {
-                    console.log("getConfigData -> response", response);
-                    let { status, data } = response;
-                    let errCode = data.error_code;
-                    if (
-                        status === 200 &&
-                        errCode === 4000 &&
-                        Object.keys(data).length > 0
-                    ) {
-                        let configData = [{
-                            phones: data.phone.map((item) => {
-                                return item;
-                            }),
-                            devicePhyID: devicePhyID,
-                            sendTimes: data.send_times,
-                            sendInterval: data.send_interval,
-                        }];
-                        console.log("getConfigData -> configData", configData)
-                        devicePhyID && (self.confForm = configData) || (self.configData = configData)
+            self.$services
+                .devSendConf({
+                    params: {
+                        eventtype: 2,
+                    },
+                })
+                .then(function(res) {
+                    let { error_code, data } = res;
+                    if (error_code === 4000 && Object.keys(data).length > 0) {
+                        for (let key in data) {
+                            let devId = parseInt(key);
+                            let item = data[key];
+                            self.configData.push({
+                                devicePhyID: devId,
+                                collector: self.devicePhy.filter(
+                                    (item) => item.devId === devId
+                                )[0].name,
+                                phones: item.phone.map((pItem) => {
+                                    return { value: pItem };
+                                }),
+                                sendTimes: item.send_times,
+                                sendInterval: item.send_interval,
+                            });
+                        }
                     }
                 })
                 .catch(function(error) {
@@ -204,31 +200,36 @@ export default {
                 if (valid) {
                     console.log("submit!");
                     let formData = self.confForm;
-                    self.axios
-                        .post(
-                            `../api/send_conf.php?eventtype=1&token=${self.token}&user_id=${formData.devicePhyID}`,
-                            {
+                    self.$services
+                        .devSendConf({
+                            isHandleError: true, //对该接口进行全局错误提示。
+                            method: "post",
+                            headers: {
+                                "Content-Type": "application/json; charset=UTF-8",
+                            },
+                            params: {
+                                eventtype: 1,
+                                user_id: formData.devicePhyID,
+                            },
+                            data: {
                                 send_times: formData.sendTimes,
                                 send_interval: formData.sendInterval,
                                 phone: formData.phones.map(
                                     (item) => item.value
                                 ),
-                            }
-                        )
-                        .then(function(response) {
-                            console.log("onSubmit -> response", response);
-                            let { status, data } = response;
-                            let errCode = data.error_code;
-                            if (status === 200) {
-                                self.$message({
-                                    message:
-                                        errCode === 4008
-                                            ? "添加成功！"
-                                            : "修改成功！",
-                                    type: "success",
-                                    offset: 70,
-                                });
-                            }
+                            },
+                        })
+                        .then(function(res) {
+                            let errorCode = res.error_code;
+                            const errorCodeObj = {4000: "提交成功！"};
+                            const inErrorCodeObj = errorCodeObj[errorCode] ? true : false;
+                            self.$message({
+                                message: inErrorCodeObj ? errorCodeObj[errorCode] : res.error_msg,
+                                type: inErrorCodeObj ? "success" : "error",
+                                offset: 70,
+                            });
+                            self.configData = [];
+                            self.getConfigData();
                         })
                         .catch(function(error) {
                             console.log(error);
@@ -241,6 +242,9 @@ export default {
         },
         resetForm(formName) {
             this.$refs[formName].resetFields();
+            this.confForm.phones = [{ values: "" }];
+            this.submitType = 0;
+            this.isEdit = false;
         },
         removeDomain(item) {
             var index = this.confForm.phones.indexOf(item);
@@ -270,8 +274,10 @@ export default {
             }
         },
         confEdit(index, row) {
-            console.log("confEdit -> index, row", index, row);
-            this.getConfigData(2);
+            const newRow = JSON.stringify(row);
+            this.confForm = JSON.parse(newRow);
+            this.submitType = 1;
+            this.isEdit = true;
         },
         confDelete(index, row) {
             console.log("confDelete -> index, row", index, row);

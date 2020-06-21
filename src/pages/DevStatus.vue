@@ -8,8 +8,9 @@
                 :data="devData"
                 style="width: 100%"
                 :row-class-name="rowClassName"
-                row-key="devId"
-                :expand-row-keys="[expandRowKey]"
+                :row-key="getRowKeys"
+                :expand-row-keys="expandRowKey"
+                @expand-change="expandSelect"
             >
                 <el-table-column type="expand">
                     <template slot-scope="props">
@@ -132,21 +133,37 @@ export default {
     name: "DevStatus",
     data() {
         return {
-            expandRowKey: null,
+            firstRowKeyExpand: true, // 初始时，第一行是否展开标识
+            getRowKeys(row) {
+                // 行数据的 Key
+                return row.devId;
+            },
+            expandRowKey: [], // 根据rowKey，设置默认展开的行数组
             devData: [],
             chartOptions: {},
+            chartUpdateTime: [],
+            chartUpdateValue: [],
         };
     },
     mounted() {
         this.createInterVal(this.getDevData, 10000);
-        this.getOptions();
-    },
-    computed: {
-        token() {
-            return sessionStorage.getItem("tk");
-        },
+        this.getChartOptions();
     },
     methods: {
+        expandSelect(row, expandedRows) {
+            var self = this;
+            self.firstRowKeyExpand = false;
+            if (expandedRows.length) {
+                self.expandRowKey = [];
+                if (row) {
+                    let devId = row.devId;
+                    self.expandRowKey.push(devId); // 每次push进去的是每行的ID
+                    self.getHistData(devId);
+                }
+            } else {
+                self.expandRowKey = [];
+            }
+        },
         createInterVal(fn, interval) {
             fn();
             let timer = setInterval(() => {
@@ -158,19 +175,21 @@ export default {
         },
         getDevData() {
             let self = this;
-            self.axios
-                .get(`../api/query.php?eventtype=4&token=${self.token}`)
-                .then(function(response) {
-                    console.log("getDevData -> response", response);
-                    let { status, data } = response;
-                    let errCode = data.error_code;
-                    if (
-                        status === 200 &&
-                        errCode === 4000 &&
-                        data.rundata.length > 0
-                    ) {
-                        self.expandRowKey = data.rundata[0].device_id; //默认展开第一行
-                        self.devData = data.rundata.map((item) => {
+            self.$services
+                .devStatusData({
+                    params: {
+                        eventtype: 4,
+                    },
+                })
+                .then(function(res) {
+                    let { error_code, rundata } = res;
+                    if (error_code === 4000 && rundata.length > 0) {
+                        if (self.firstRowKeyExpand) {
+                            let devId = rundata[0].device_id;
+                            self.expandRowKey.push(devId);
+                            self.getHistData(devId);
+                        }
+                        self.devData = rundata.map((item) => {
                             return {
                                 devId: item.device_id,
                                 channel: item.channel,
@@ -190,7 +209,43 @@ export default {
                     console.log("getDevData -> error", error);
                 });
         },
-        getOptions() {
+        getHistData(devId) {
+            let self = this;
+            self.chartUpdateTime = [];
+            self.chartUpdateValue = [];
+            self.$services
+                .devStatusData({
+                    params: {
+                        eventtype: 2,
+                        device_id: devId,
+                        num: 10,
+                    },
+                })
+                .then(function(res) {
+                    let { error_code, histdata } = res;
+                    let histdataLen = histdata.length;
+                    if (error_code === 4000 && histdataLen > 0) {
+                        for (let i = 0; i < histdataLen; i++) {
+                            if (
+                                self.hasOwnProp(histdata[i], "liquid_value") &&
+                                self.hasOwnProp(histdata[i], "updatetime")
+                            ) {
+                                self.chartUpdateTime.push(
+                                    histdata[i].updatetime
+                                );
+                                self.chartUpdateValue.push(
+                                    histdata[i].liquid_value
+                                );
+                            }
+                        }
+                        self.getChartOptions();
+                    }
+                })
+                .catch(function(error) {
+                    console.log("getDevData -> error", error);
+                });
+        },
+        getChartOptions() {
             this.chartOptions = {
                 title: {
                     text: "历史油位曲线",
@@ -201,17 +256,7 @@ export default {
                 },
                 xAxis: {
                     type: "category",
-                    data: [
-                        "2020-05-29 12:30:56",
-                        "2020-05-29 13:31:02",
-                        "2020-05-29 14:30:23",
-                        "2020-05-29 15:29:45",
-                        "2020-05-29 16:31:56",
-                        "2020-05-29 17:32:54",
-                        "2020-05-29 18:30:34",
-                        "2020-05-29 19:29:26",
-                        "2020-05-29 30:30:42",
-                    ],
+                    data: this.chartUpdateTime,
                     axisLine: {
                         lineStyle: {
                             color: "#666",
@@ -231,18 +276,7 @@ export default {
                 series: [
                     {
                         name: "液位值",
-                        data: [
-                            30.8,
-                            52.3,
-                            81.1,
-                            102.6,
-                            121.1,
-                            142.0,
-                            163.9,
-                            180.2,
-                            200.3,
-                            220.8,
-                        ],
+                        data: this.chartUpdateValue,
                         type: "line",
                         smooth: true,
                     },
@@ -266,6 +300,9 @@ export default {
         devControl(index, row) {
             console.log(index, row);
             row.workStatus = row.workStatus === 3 ? row.workWay : 3;
+        },
+        hasOwnProp(obj, key) {
+            return Object.prototype.hasOwnProperty.call(obj, key);
         },
     },
     components: {

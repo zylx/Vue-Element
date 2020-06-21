@@ -79,36 +79,26 @@ export default {
             let self = this;
             self.$refs[formName].validate((valid) => {
                 if (valid) {
-                    console.log("submit!");
-                    console.log(self.$refs[formName]);
-                    self.axios
-                        .get("api/login.php", {
+                    console.log("login submit!");
+                    self.$services
+                        .login({
                             params: {
                                 username: self.userForm.user,
-                                password: self
-                                    .$md5(self.userForm.pass)
-                                    .substr(5, 10),
+                                password: self.$md5(self.userForm.pass).substr(5, 10),
                             },
                         })
-                        .then(function(response) {
-                            console.log(response);
-                            let { status, data } = response;
-                            let errCode = data.error_code;
-                            if (status === 200 && errCode === 4000) {
+                        .then(function(res) {
+                            console.log(res);
+                            let errCode = res.error_code;
+                            if (errCode === 4000) {
                                 self.$message({
                                     message: "登录成功！",
                                     type: "success",
                                     duration: 2000,
                                     offset: 70,
                                     onClose: () => {
-                                        sessionStorage.setItem(
-                                            "user",
-                                            self.userForm.user
-                                        );
-                                        sessionStorage.setItem(
-                                            "tk",
-                                            data.token
-                                        );
+                                        sessionStorage.setItem("user", self.userForm.user);
+                                        sessionStorage.setItem("tk", res.token);
                                         self.$router.push({
                                             path: "/dev/status",
                                         });
