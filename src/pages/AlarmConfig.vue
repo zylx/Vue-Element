@@ -221,10 +221,12 @@ export default {
                         })
                         .then(function(res) {
                             let errorCode = res.error_code;
-                            const errorCodeObj = {4000: "提交成功！"};
+                            const errorCodeObj = { 4000: "提交成功！" };
                             const inErrorCodeObj = errorCodeObj[errorCode] ? true : false;
                             self.$message({
-                                message: inErrorCodeObj ? errorCodeObj[errorCode] : res.error_msg,
+                                message: inErrorCodeObj
+                                    ? errorCodeObj[errorCode]
+                                    : res.error_msg,
                                 type: inErrorCodeObj ? "success" : "error",
                                 offset: 70,
                             });
@@ -273,14 +275,35 @@ export default {
                 }
             }
         },
-        confEdit(index, row) {
-            const newRow = JSON.stringify(row);
+        confEdit(param) {
+            const newRow = JSON.stringify(param.row);
             this.confForm = JSON.parse(newRow);
             this.submitType = 1;
             this.isEdit = true;
         },
-        confDelete(index, row) {
-            console.log("confDelete -> index, row", index, row);
+        confDelete(param) {
+            let devicePhyID = param.row.devicePhyID;
+            let self = this;
+            self.$services
+                .devSendConf({
+                    params: {
+                        eventtype: 3,
+                        user_id: devicePhyID,
+                    },
+                })
+                .then(function(res) {
+                  let isSuccess = res.error_code === 4000;
+                  self.$message({
+                      message: isSuccess ? '删除成功！' : res.error_msg,
+                      type: isSuccess ? "success" : "error",
+                      offset: 70,
+                  });
+                  self.configData = [];
+                  self.getConfigData();
+                })
+                .catch(function(error) {
+                    console.log(error);
+                });
         },
     },
     components: {

@@ -2,10 +2,7 @@
     <el-table
         :data="
             configData.filter(
-                (item) =>
-                    !searchKey ||
-                    item.collector.includes(searchKey) ||
-                    item.devicePhyID.includes(searchKey)
+                (item) => !searchKey || item.collector.includes(searchKey) || item.devicePhyID.toString().includes(searchKey)
             )
         "
         style="width: 100%"
@@ -47,7 +44,7 @@
             </template>
         </el-table-column>
         <el-table-column align="right" width="220">
-            <template slot="header" slot-scope="search">
+            <template slot="header" slot-scope="scope">
                 <el-input
                     v-model="searchKey"
                     size="mini"
@@ -58,15 +55,23 @@
                 <el-button
                     size="mini"
                     type="primary"
-                    @click="confEdit(scope.$index, scope.row)"
-                    >编辑</el-button
+                    @click="$emit('confEdit', {index: scope.$index, row: scope.row})"
+                    style="margin-right: 5px;">编辑</el-button
                 >
-                <el-button
+                <el-popconfirm
+                  title="确定要删除该配置吗？"
+                  confirmButtonText='确定'
+                  cancelButtonText='取消'
+                  icon="el-icon-info"
+                  iconColor="#e6a23c"
+                  @onConfirm="$emit('confDelete', {index: scope.$index, row: scope.row})"
+                >
+                  <el-button
                     size="mini"
                     type="danger"
-                    @click="confDelete(scope.$index, scope.row)"
-                    >删除</el-button
-                >
+                    slot="reference"
+                    >删除</el-button>
+                </el-popconfirm>
             </template>
         </el-table-column>
     </el-table>
@@ -77,21 +82,13 @@ export default {
     props: {
         configData: {
             type: Array,
-            default: [],
+            default: () => [],
         },
     },
     data() {
         return {
             searchKey: "",
         };
-    },
-    methods: {
-        confEdit(index, row) {
-            this.$emit("confEdit", index, row);
-        },
-        confDelete(index, row) {
-            this.$emit("confDelete", index, row);
-        },
-    },
+    }
 };
 </script>
