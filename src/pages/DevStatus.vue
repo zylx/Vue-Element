@@ -248,7 +248,7 @@ export default {
         getChartOptions() {
             this.chartOptions = {
                 title: {
-                    text: "历史油位曲线",
+                    text: "实时油位曲线",
                 },
                 tooltip: {},
                 legend: {
@@ -298,8 +298,27 @@ export default {
                 : workStatus[row.workWay];
         },
         devControl(index, row) {
-            console.log(index, row);
-            row.workStatus = row.workStatus === 3 ? row.workWay : 3;
+            let self = this;
+            let workStatus = row.workStatus === 3 ? 1 : 2;
+            self.$services
+                .devControl({
+                    params: {
+                        eventtype: workStatus,
+                        device_id: row.devId
+                    }
+                })
+                .then(function(res) {
+                    let isSuccess = res.error_code === 4000;
+                    self.$message({
+                        message: isSuccess ? '操作成功！' : res.error_msg,
+                        type: isSuccess ? "success" : "error",
+                        offset: 70,
+                    });
+                })
+                .catch(function(error) {
+                    console.log("devControl -> error", error);
+                })
+            row.workStatus = workStatus === 1 ? row.workWay : 3;
         },
         hasOwnProp(obj, key) {
             return Object.prototype.hasOwnProperty.call(obj, key);
