@@ -10,6 +10,7 @@ const {
 module.exports = {
     // 开发模式，webpack会根据该模式使用相应的编译配置
     mode: 'development',
+    // mode: 'production',
     // 打包入口
     entry: ['./src/main.js', './src/index.html'],
     // 打包后资源输出路径
