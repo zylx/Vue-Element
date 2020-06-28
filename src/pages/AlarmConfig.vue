@@ -205,7 +205,8 @@ export default {
                             isHandleError: true, //对该接口进行全局错误提示。
                             method: "post",
                             headers: {
-                                "Content-Type": "application/json; charset=UTF-8",
+                                "Content-Type":
+                                    "application/json; charset=UTF-8",
                             },
                             params: {
                                 eventtype: 1,
@@ -222,7 +223,9 @@ export default {
                         .then(function(res) {
                             let errorCode = res.error_code;
                             const errorCodeObj = { 4000: "提交成功！" };
-                            const inErrorCodeObj = errorCodeObj[errorCode] ? true : false;
+                            const inErrorCodeObj = errorCodeObj[errorCode]
+                                ? true
+                                : false;
                             self.$message({
                                 message: inErrorCodeObj
                                     ? errorCodeObj[errorCode]
@@ -292,14 +295,14 @@ export default {
                     },
                 })
                 .then(function(res) {
-                  let isSuccess = res.error_code === 4000;
-                  self.$message({
-                      message: isSuccess ? '删除成功！' : res.error_msg,
-                      type: isSuccess ? "success" : "error",
-                      offset: 70,
-                  });
-                  self.configData = [];
-                  self.getConfigData();
+                    let isSuccess = res.error_code === 4000;
+                    self.$message({
+                        message: isSuccess ? "删除成功！" : res.error_msg,
+                        type: isSuccess ? "success" : "error",
+                        offset: 70,
+                    });
+                    self.configData = [];
+                    self.getConfigData();
                 })
                 .catch(function(error) {
                     console.log(error);

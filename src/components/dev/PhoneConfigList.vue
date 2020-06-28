@@ -48,7 +48,7 @@
                 <el-input
                     v-model="searchKey"
                     size="mini"
-                    placeholder="输入关键字搜索"
+                    placeholder="请输入采集设备名称或者ID搜索"
                 />
             </template>
             <template slot-scope="scope">
@@ -59,17 +59,17 @@
                     style="margin-right: 5px;">编辑</el-button
                 >
                 <el-popconfirm
-                  title="确定要删除该配置吗？"
-                  confirmButtonText='确定'
-                  cancelButtonText='取消'
-                  icon="el-icon-info"
-                  iconColor="#e6a23c"
-                  @onConfirm="$emit('confDelete', {index: scope.$index, row: scope.row})"
-                >
-                  <el-button
-                    size="mini"
-                    type="danger"
-                    slot="reference"
+                    title="确定要删除该配置吗？"
+                    confirmButtonText='确定'
+                    cancelButtonText='取消'
+                    icon="el-icon-info"
+                    iconColor="#e6a23c"
+                    @onConfirm="$emit('confDelete', {index: scope.$index, row: scope.row})"
+                    >
+                    <el-button
+                        size="mini"
+                        type="danger"
+                        slot="reference"
                     >删除</el-button>
                 </el-popconfirm>
             </template>
