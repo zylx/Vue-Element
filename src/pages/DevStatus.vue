@@ -178,7 +178,7 @@ export default {
             self.$services
                 .devStatusData({
                     params: {
-                        eventtype: 4,
+                        eventtype: 1,
                     },
                 })
                 .then(function(res) {
